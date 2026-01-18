@@ -1,1341 +1,330 @@
-<!doctype html>
-<html lang="en">
-<head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>ReelFoundry - AI ad iteration for beauty and skincare</title>
-  <link rel="preconnect" href="https://fonts.googleapis.com" />
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-  <link href="https://fonts.googleapis.com/css2?family=Gloock&family=Recursive:wght@300;400;500;600;700&family=Spline+Sans+Mono:wght@400;600&display=swap" rel="stylesheet" />
-  <style>
-    :root {
-      --bg: #0B0C10;
-      --panel: #11131A;
-      --ink: #F7F3EA;
-      --muted: #7D8790;
-      --accent: #FF4F00;
-      --acid: #B8FF2C;
-      --shadow: 0 24px 60px rgba(0, 0, 0, 0.45);
-      --radius: 16px;
-      --radius-sm: 10px;
-    }
-
-    * {
-      box-sizing: border-box;
-      margin: 0;
-      padding: 0;
-    }
-
-    body {
-      font-family: "Recursive", sans-serif;
-      background: radial-gradient(1200px 800px at 10% -10%, rgba(255, 79, 0, 0.12), transparent 60%),
-        radial-gradient(1000px 600px at 90% 10%, rgba(184, 255, 44, 0.08), transparent 60%),
-        var(--bg);
-      color: var(--ink);
-      line-height: 1.6;
-      min-height: 100vh;
-      position: relative;
-    }
-
-    body::before {
-      content: "";
-      position: fixed;
-      inset: 0;
-      background-image:
-        linear-gradient(rgba(255, 255, 255, 0.04) 1px, transparent 1px),
-        linear-gradient(90deg, rgba(255, 255, 255, 0.04) 1px, transparent 1px);
-      background-size: 60px 60px;
-      opacity: 0.4;
-      pointer-events: none;
-      z-index: 0;
-    }
-
-    .grain {
-      position: fixed;
-      inset: 0;
-      width: 100%;
-      height: 100%;
-      opacity: 0.07;
-      pointer-events: none;
-      z-index: 1;
-      mix-blend-mode: soft-light;
-    }
-
-    a {
-      color: inherit;
-      text-decoration: none;
-    }
-
-    img {
-      max-width: 100%;
-      display: block;
-    }
-
-    button,
-    input {
-      font-family: inherit;
-      color: inherit;
-    }
-
-    :focus-visible {
-      outline: 2px solid var(--acid);
-      outline-offset: 3px;
-    }
-
-    .skip-link {
-      position: absolute;
-      top: -120px;
-      left: 16px;
-      background: var(--acid);
-      color: #121212;
-      padding: 10px 14px;
-      border-radius: 999px;
-      font-weight: 600;
-      z-index: 5;
-      transition: top 0.2s ease;
-    }
-
-    .skip-link:focus {
-      top: 12px;
-    }
-
-    .container {
-      width: min(1120px, 92vw);
-      margin: 0 auto;
-      position: relative;
-      z-index: 2;
-    }
-
-    header {
-      position: sticky;
-      top: 0;
-      background: rgba(11, 12, 16, 0.9);
-      backdrop-filter: blur(12px);
-      border-bottom: 1px solid rgba(255, 255, 255, 0.06);
-      z-index: 4;
-    }
-
-    .nav {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      gap: 16px;
-      padding: 14px 0;
-      flex-wrap: wrap;
-    }
-
-    .brand {
-      font-family: "Gloock", serif;
-      font-size: 1.4rem;
-      letter-spacing: 0.02em;
-    }
-
-    .nav-links {
-      display: none;
-      gap: 20px;
-      font-size: 0.95rem;
-      color: var(--muted);
-    }
-
-    .nav-links a {
-      position: relative;
-    }
-
-    .nav-links a::after {
-      content: "";
-      position: absolute;
-      left: 0;
-      bottom: -6px;
-      width: 0;
-      height: 2px;
-      background: var(--accent);
-      transition: width 0.2s ease;
-    }
-
-    .nav-links a:hover::after,
-    .nav-links a:focus-visible::after {
-      width: 100%;
-    }
-
-    .nav-cta {
-      background: var(--accent);
-      color: #1b0f0a;
-      padding: 8px 14px;
-      border-radius: 999px;
-      font-weight: 600;
-      border: none;
-      cursor: pointer;
-      box-shadow: var(--shadow);
-    }
-
-    main {
-      position: relative;
-      z-index: 2;
-    }
-
-    section {
-      padding: 72px 0;
-    }
-
-    .eyebrow {
-      font-family: "Spline Sans Mono", monospace;
-      font-size: 0.75rem;
-      letter-spacing: 0.16em;
-      text-transform: uppercase;
-      color: var(--muted);
-    }
-
-    .stamp {
-      display: inline-flex;
-      align-items: center;
-      gap: 6px;
-      border: 1px solid rgba(255, 255, 255, 0.18);
-      border-radius: 999px;
-      padding: 6px 12px;
-      font-family: "Spline Sans Mono", monospace;
-      font-size: 0.72rem;
-      letter-spacing: 0.16em;
-      text-transform: uppercase;
-      color: var(--acid);
-      background: rgba(184, 255, 44, 0.08);
-    }
-
-    .hero {
-      padding-top: 84px;
-    }
-
-    .hero-grid {
-      display: grid;
-      grid-template-columns: 1fr;
-      gap: 32px;
-      align-items: center;
-    }
-
-    .hero h1 {
-      font-family: "Gloock", serif;
-      font-size: clamp(2.6rem, 5vw, 4.4rem);
-      line-height: 1.05;
-      margin: 16px 0 18px;
-    }
-
-    .hero p {
-      color: var(--muted);
-      font-size: 1rem;
-    }
-
-    .hero .tagline {
-      font-family: "Spline Sans Mono", monospace;
-      text-transform: uppercase;
-      letter-spacing: 0.12em;
-      color: var(--acid);
-      font-size: 0.78rem;
-      margin-bottom: 12px;
-    }
-
-    .hero .niche {
-      margin-top: 22px;
-      color: var(--ink);
-      font-weight: 500;
-      font-size: 0.92rem;
-    }
-
-    .hero-actions {
-      display: flex;
-      flex-direction: column;
-      align-items: stretch;
-      gap: 12px;
-      margin-top: 24px;
-    }
-
-    .hero-actions > * {
-      width: 100%;
-      text-align: center;
-    }
-
-    .btn-primary {
-      background: var(--accent);
-      color: #1b0f0a;
-      padding: 14px 22px;
-      border-radius: 999px;
-      border: none;
-      font-weight: 600;
-      cursor: pointer;
-      transition: transform 0.2s ease;
-      box-shadow: var(--shadow);
-    }
-
-    .btn-primary:hover {
-      transform: translateY(-1px);
-    }
-
-    .btn-ghost {
-      border: 1px solid rgba(255, 255, 255, 0.15);
-      color: var(--ink);
-      padding: 12px 18px;
-      border-radius: 999px;
-      background: transparent;
-      cursor: pointer;
-    }
-
-    .hero-assembly {
-      background: var(--panel);
-      border-radius: var(--radius);
-      padding: 20px;
-      position: relative;
-      box-shadow: var(--shadow);
-      overflow: hidden;
-    }
-
-    .hero-assembly::after {
-      content: none;
-    }
-
-    .hero-form {
-      display: grid;
-      gap: 12px;
-      position: relative;
-      z-index: 1;
-    }
-
-    .dropzone {
-      border: 1px dashed rgba(255, 255, 255, 0.2);
-      border-radius: var(--radius-sm);
-      padding: 16px;
-      background: rgba(255, 255, 255, 0.02);
-    }
-
-    .dropzone label {
-      display: block;
-      font-size: 0.85rem;
-      color: var(--muted);
-      margin-bottom: 8px;
-    }
-
-    .dropzone input {
-      width: 100%;
-      background: transparent;
-      border: none;
-      border-bottom: 1px solid rgba(255, 255, 255, 0.2);
-      padding: 10px 0;
-      font-size: 1rem;
-    }
-
-    .form-feedback {
-      font-size: 0.85rem;
-      color: var(--muted);
-      min-height: 18px;
-    }
-
-    .form-feedback.error {
-      color: var(--accent);
-    }
-
-    .pipeline {
-      display: flex;
-      align-items: center;
-      flex-wrap: wrap;
-      gap: 8px;
-      margin-top: 14px;
-      font-family: "Spline Sans Mono", monospace;
-      font-size: 0.75rem;
-      letter-spacing: 0.12em;
-      text-transform: uppercase;
-      color: var(--muted);
-    }
-
-    .pipeline span {
-      padding: 6px 10px;
-      border-radius: 999px;
-      border: 1px solid rgba(255, 255, 255, 0.1);
-    }
-
-    .pipeline .arrow {
-      color: var(--accent);
-    }
-
-    .feed-area {
-      margin-top: 22px;
-      position: relative;
-    }
-
-    .feed-line {
-      height: 1px;
-      background: linear-gradient(90deg, rgba(255, 255, 255, 0.1), rgba(184, 255, 44, 0.4), rgba(255, 255, 255, 0.1));
-      margin: 16px 0 8px;
-    }
-
-    .slug {
-      position: absolute;
-      left: 8px;
-      top: -6px;
-      background: var(--acid);
-      color: #0b0c10;
-      font-family: "Spline Sans Mono", monospace;
-      font-size: 0.7rem;
-      letter-spacing: 0.1em;
-      text-transform: uppercase;
-      padding: 6px 10px;
-      border-radius: 999px;
-      opacity: 0;
-      pointer-events: none;
-    }
-
-    .hero.feed .slug {
-      animation: slug-feed 1.1s ease forwards;
-    }
-
-    @keyframes slug-feed {
-      0% {
-        opacity: 0;
-        transform: translate(0, 0) scale(0.9);
-      }
-      20% {
-        opacity: 1;
-      }
-      100% {
-        opacity: 0;
-        transform: translate(320px, 120px) scale(0.8);
-      }
-    }
-
-    .conveyor {
-      background: #0c0e14;
-      border-radius: var(--radius-sm);
-      padding: 18px 12px 16px;
-      position: relative;
-      overflow: hidden;
-      border: 1px solid rgba(255, 255, 255, 0.08);
-    }
-
-    .conveyor-title {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      margin-bottom: 12px;
-    }
-
-    .conveyor-title .label {
-      font-family: "Spline Sans Mono", monospace;
-      font-size: 0.7rem;
-      letter-spacing: 0.2em;
-      text-transform: uppercase;
-      color: var(--muted);
-    }
-
-    .filmstrip {
-      position: relative;
-      background: #0f1118;
-      padding: 18px 12px;
-      border-radius: 12px;
-      overflow: hidden;
-      border: 1px solid rgba(255, 255, 255, 0.1);
-    }
-
-    .filmstrip::before,
-    .filmstrip::after {
-      content: "";
-      position: absolute;
-      left: 0;
-      right: 0;
-      height: 10px;
-      background-image: radial-gradient(circle at 10px 50%, #060709 0 4px, transparent 5px);
-      background-size: 24px 10px;
-      background-repeat: repeat-x;
-      opacity: 0.8;
-    }
-
-    .filmstrip::before {
-      top: 6px;
-    }
-
-    .filmstrip::after {
-      bottom: 6px;
-    }
-
-    .reels {
-      display: flex;
-      gap: 14px;
-      align-items: center;
-      animation: reel-move 18s linear infinite;
-    }
-
-    .reel-card {
-      min-width: 120px;
-      background: #141825;
-      border-radius: 10px;
-      padding: 12px;
-      border: 1px solid rgba(255, 255, 255, 0.12);
-      box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.02);
-    }
-
-    .reel-card .reel-title {
-      font-size: 0.78rem;
-      font-family: "Spline Sans Mono", monospace;
-      letter-spacing: 0.08em;
-      text-transform: uppercase;
-    }
-
-    .reel-card .reel-sub {
-      font-size: 0.7rem;
-      color: var(--muted);
-      margin-top: 6px;
-    }
-
-    @keyframes reel-move {
-      0% {
-        transform: translateX(0);
-      }
-      100% {
-        transform: translateX(-50%);
-      }
-    }
-
-    .section-title {
-      font-family: "Gloock", serif;
-      font-size: clamp(1.9rem, 6vw, 3.2rem);
-      margin: 16px 0;
-      line-height: 1.15;
-    }
-
-    .section-subtitle {
-      color: var(--muted);
-      max-width: 560px;
-    }
-
-    .example {
-      position: relative;
-    }
-
-    .example::after {
-      content: "";
-      position: absolute;
-      right: 8%;
-      top: 12%;
-      width: 220px;
-      height: 220px;
-      border: 1px solid rgba(255, 255, 255, 0.2);
-      transform: rotate(12deg);
-      opacity: 0.4;
-      display: none;
-    }
-
-    .carousel {
-      margin-top: 28px;
-      position: relative;
-      overflow: hidden;
-      border-radius: var(--radius);
-      background: var(--panel);
-      border: 1px solid rgba(255, 255, 255, 0.08);
-    }
-
-    .carousel-track {
-      display: flex;
-      transition: transform 0.4s ease;
-    }
-
-    .slide {
-      min-width: 100%;
-      padding: 24px;
-      display: grid;
-      grid-template-columns: 1fr;
-      gap: 22px;
-      align-items: center;
-    }
-
-    .poster {
-      background: #0b0c10;
-      border-radius: 18px;
-      border: 1px solid rgba(255, 255, 255, 0.1);
-      padding: 20px;
-      position: relative;
-      min-height: 180px;
-      box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.03);
-    }
-
-    .poster::after {
-      content: "";
-      position: absolute;
-      inset: 16px;
-      border: 1px dashed rgba(255, 255, 255, 0.15);
-      border-radius: 12px;
-      pointer-events: none;
-    }
-
-    .play {
-      width: 46px;
-      height: 46px;
-      border-radius: 50%;
-      border: 1px solid rgba(255, 255, 255, 0.2);
-      display: grid;
-      place-items: center;
-      margin-bottom: 18px;
-    }
-
-    .play::before {
-      content: "";
-      width: 0;
-      height: 0;
-      border-left: 12px solid var(--accent);
-      border-top: 8px solid transparent;
-      border-bottom: 8px solid transparent;
-      margin-left: 4px;
-    }
-
-    .poster-info .label {
-      font-family: "Spline Sans Mono", monospace;
-      font-size: 0.72rem;
-      text-transform: uppercase;
-      letter-spacing: 0.14em;
-      color: var(--muted);
-    }
-
-    .poster-info h3 {
-      font-size: 1.2rem;
-      margin: 10px 0 6px;
-    }
-
-    .carousel-controls {
-      display: flex;
-      flex-direction: column;
-      align-items: stretch;
-      gap: 12px;
-      justify-content: space-between;
-      padding: 16px 20px 24px;
-    }
-
-    .carousel-buttons {
-      display: flex;
-      gap: 10px;
-    }
-
-    .icon-btn {
-      background: transparent;
-      border: 1px solid rgba(255, 255, 255, 0.2);
-      color: var(--ink);
-      border-radius: 999px;
-      padding: 8px 14px;
-      cursor: pointer;
-    }
-
-    .dots {
-      display: flex;
-      gap: 8px;
-    }
-
-    .dot {
-      width: 10px;
-      height: 10px;
-      border-radius: 50%;
-      border: 1px solid rgba(255, 255, 255, 0.3);
-      background: transparent;
-      cursor: pointer;
-    }
-
-    .dot.active {
-      background: var(--acid);
-      border-color: var(--acid);
-    }
-
-    .social-proof {
-      background: var(--panel);
-      border-top: 1px solid rgba(255, 255, 255, 0.06);
-      border-bottom: 1px solid rgba(255, 255, 255, 0.06);
-    }
-
-    .logo-grid {
-      margin-top: 32px;
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
-      gap: 16px;
-    }
-
-    .logo {
-      border: 1px solid rgba(255, 255, 255, 0.1);
-      border-radius: 10px;
-      padding: 16px;
-      text-align: center;
-      font-family: "Spline Sans Mono", monospace;
-      text-transform: uppercase;
-      letter-spacing: 0.12em;
-      color: var(--muted);
-      background: rgba(255, 255, 255, 0.02);
-    }
-
-    .metrics-grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
-      gap: 20px;
-      margin-top: 32px;
-    }
-
-    .metric-card {
-      background: var(--panel);
-      padding: 22px;
-      border-radius: var(--radius-sm);
-      border: 1px solid rgba(255, 255, 255, 0.08);
-    }
-
-    .metric-card h3 {
-      font-size: 2rem;
-      font-family: "Gloock", serif;
-    }
-
-    .metric-card p {
-      color: var(--muted);
-      margin-top: 8px;
-    }
-
-    .footnote {
-      font-size: 0.8rem;
-      color: var(--muted);
-      margin-top: 12px;
-    }
-
-    .platform {
-      background: linear-gradient(120deg, rgba(255, 79, 0, 0.08), transparent 60%);
-    }
-
-    .benefits {
-      display: grid;
-      gap: 32px;
-      margin-top: 36px;
-    }
-
-    .benefit {
-      display: grid;
-      grid-template-columns: 1fr;
-      gap: 28px;
-      align-items: center;
-    }
-
-    .benefit:nth-child(even) .benefit-media {
-      order: 0;
-    }
-
-    .benefit-media {
-      background: #0e1016;
-      border-radius: var(--radius);
-      padding: 20px;
-      border: 1px solid rgba(255, 255, 255, 0.08);
-      position: relative;
-      min-height: 180px;
-      overflow: hidden;
-    }
-
-    .schematic-grid {
-      position: absolute;
-      inset: 18px;
-      border: 1px dashed rgba(255, 255, 255, 0.1);
-      border-radius: 12px;
-    }
-
-    .schematic-reel {
-      position: absolute;
-      left: 16px;
-      bottom: 20px;
-      width: 120px;
-      height: 64px;
-      border-radius: 8px;
-      border: 1px solid rgba(255, 255, 255, 0.2);
-      background: linear-gradient(120deg, rgba(255, 255, 255, 0.08), transparent 70%);
-    }
-
-    .schematic-stamp {
-      position: absolute;
-      right: 18px;
-      top: 18px;
-      border: 1px solid rgba(255, 255, 255, 0.2);
-      border-radius: 999px;
-      padding: 6px 12px;
-      font-family: "Spline Sans Mono", monospace;
-      font-size: 0.7rem;
-      text-transform: uppercase;
-      letter-spacing: 0.12em;
-      color: var(--acid);
-    }
-
-    .benefit h3 {
-      font-size: 1.4rem;
-      font-family: "Gloock", serif;
-    }
-
-    .benefit p {
-      color: var(--muted);
-      margin-top: 12px;
-    }
-
-    .pricing {
-      background: var(--panel);
-      border-top: 1px solid rgba(255, 255, 255, 0.06);
-      border-bottom: 1px solid rgba(255, 255, 255, 0.06);
-    }
-
-    .billing-toggle {
-      display: flex;
-      align-items: center;
-      flex-wrap: wrap;
-      gap: 12px;
-      margin: 20px 0 30px;
-      font-family: "Spline Sans Mono", monospace;
-      text-transform: uppercase;
-      letter-spacing: 0.1em;
-      font-size: 0.75rem;
-    }
-
-    .toggle {
-      width: 52px;
-      height: 28px;
-      border-radius: 999px;
-      border: 1px solid rgba(255, 255, 255, 0.2);
-      background: rgba(255, 255, 255, 0.08);
-      position: relative;
-      cursor: pointer;
-    }
-
-    .toggle-thumb {
-      position: absolute;
-      top: 4px;
-      left: 4px;
-      width: 20px;
-      height: 20px;
-      background: var(--ink);
-      border-radius: 50%;
-      transition: transform 0.2s ease;
-    }
-
-    .toggle[aria-checked="true"] .toggle-thumb {
-      transform: translateX(24px);
-      background: var(--acid);
-    }
-
-    .pricing-grid {
-      display: grid;
-      grid-template-columns: 1fr;
-      gap: 20px;
-    }
-
-    .tier {
-      border: 1px solid rgba(255, 255, 255, 0.1);
-      border-radius: var(--radius);
-      padding: 22px;
-      background: #0b0c10;
-      position: relative;
-      display: grid;
-      gap: 14px;
-    }
-
-    .tier.popular {
-      border-color: var(--acid);
-      box-shadow: 0 0 0 1px rgba(184, 255, 44, 0.3);
-    }
-
-    .tier .tier-title {
-      font-family: "Spline Sans Mono", monospace;
-      text-transform: uppercase;
-      letter-spacing: 0.14em;
-      font-size: 0.75rem;
-      color: var(--muted);
-    }
-
-    .tier .price {
-      font-family: "Gloock", serif;
-      font-size: 2.2rem;
-    }
-
-    .tier .price span {
-      font-size: 1rem;
-      color: var(--muted);
-    }
-
-    .tier ul {
-      list-style: none;
-      display: grid;
-      gap: 8px;
-      font-size: 0.9rem;
-      color: var(--muted);
-    }
-
-    .tier li::before {
-      content: "+";
-      margin-right: 8px;
-      color: var(--acid);
-      font-weight: 600;
-    }
-
-    .tier .tier-cta {
-      justify-self: start;
-      padding: 10px 18px;
-      border-radius: 999px;
-      border: 1px solid rgba(255, 255, 255, 0.2);
-      background: transparent;
-      cursor: pointer;
-      font-weight: 600;
-    }
-
-    footer {
-      padding: 48px 0 36px;
-    }
-
-    .footer-grid {
-      display: grid;
-      grid-template-columns: 1fr;
-      gap: 24px;
-      margin-top: 24px;
-    }
-
-    .footer-grid h4 {
-      font-family: "Spline Sans Mono", monospace;
-      letter-spacing: 0.12em;
-      text-transform: uppercase;
-      font-size: 0.75rem;
-      color: var(--muted);
-    }
-
-    .footer-grid a {
-      color: var(--ink);
-      font-size: 0.9rem;
-    }
-
-    .reveal {
-      opacity: 0;
-      transform: translateY(24px);
-      transition: opacity 0.6s ease, transform 0.6s ease;
-    }
-
-    .reveal.in-view {
-      opacity: 1;
-      transform: translateY(0);
-    }
-
-    .load {
-      opacity: 0;
-      transform: translateY(20px);
-      animation: rise 0.8s ease forwards;
-    }
-
-    @keyframes rise {
-      to {
-        opacity: 1;
-        transform: translateY(0);
-      }
-    }
-
-    @media (min-width: 720px) {
-      .container {
-        width: min(1120px, 90vw);
-      }
-
-      section {
-        padding: 88px 0;
-      }
-
-      .hero {
-        padding-top: 110px;
-      }
-
-      .hero-actions {
-        flex-direction: row;
-        align-items: center;
-      }
-
-      .hero-actions > * {
-        width: auto;
-        text-align: left;
-      }
-
-      .hero-assembly {
-        padding: 28px;
-      }
-
-      .carousel {
-        margin-top: 36px;
-      }
-
-      .slide {
-        padding: 32px;
-        grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
-        gap: 26px;
-      }
-
-      .poster {
-        min-height: 220px;
-      }
-
-      .carousel-controls {
-        flex-direction: row;
-        align-items: center;
-        padding: 16px 24px 24px;
-      }
-
-      .logo-grid {
-        grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
-        gap: 20px;
-      }
-
-      .metrics-grid {
-        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-      }
-
-      .benefits {
-        gap: 48px;
-      }
-
-      .benefit {
-        grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
-        gap: 36px;
-      }
-
-      .benefit-media {
-        min-height: 220px;
-        padding: 24px;
-      }
-
-      .benefit h3 {
-        font-size: 1.6rem;
-      }
-
-      .pricing-grid {
-        grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
-      }
-
-      footer {
-        padding: 60px 0 40px;
-      }
-
-      .footer-grid {
-        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-      }
-
-      .example::after {
-        display: block;
-      }
-    }
-
-    @media (min-width: 860px) {
-      .nav {
-        padding: 18px 0;
-      }
-
-      .nav-links {
-        display: flex;
-      }
-
-      .nav-cta {
-        padding: 10px 18px;
-      }
-    }
-
-    @media (min-width: 960px) {
-      section {
-        padding: 96px 0;
-      }
-
-      .hero {
-        padding-top: 120px;
-      }
-
-      .hero-grid {
-        grid-template-columns: repeat(2, minmax(0, 1fr));
-        gap: 48px;
-      }
-
-      .benefit:nth-child(even) .benefit-media {
-        order: 2;
-      }
-    }
-
-    @media (prefers-reduced-motion: reduce) {
-      *,
-      *::before,
-      *::after {
-        animation: none !important;
-        transition: none !important;
-      }
-    }
-  </style>
+<!DOCTYPE html>
+<html class="dark" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>ReelFoundry - AI Ad Creation</title>
+<link href="https://fonts.googleapis.com" rel="preconnect"/>
+<link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700&amp;family=Playfair+Display:ital,wght@0,400;0,600;0,700;1,400&amp;display=swap" rel="stylesheet"/>
+<script src="https://cdn.tailwindcss.com?plugins=forms,typography"></script>
+<script>
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        primary: "#FF4F00", // Vivid Orange
+                        secondary: "#D1F312", // Neon Green
+                        "background-light": "#F3F4F6",
+                        "background-dark": "#0B0C10",
+                        "surface-dark": "#13151A",
+                        "surface-light": "#FFFFFF",
+                    },
+                    fontFamily: {
+                        display: ["Playfair Display", "serif"],
+                        mono: ["JetBrains Mono", "monospace"],
+                        sans: ["Inter", "sans-serif"],
+                    },
+                    backgroundImage: {
+                        'mesh-dark': "radial-gradient(at 0% 0%, hsla(253,16%,7%,1) 0, transparent 50%), radial-gradient(at 50% 0%, hsla(225,39%,30%,1) 0, transparent 50%), radial-gradient(at 100% 0%, hsla(339,49%,30%,1) 0, transparent 50%)",
+                        'grid-pattern': "linear-gradient(to right, rgba(255, 255, 255, 0.05) 1px, transparent 1px), linear-gradient(to bottom, rgba(255, 255, 255, 0.05) 1px, transparent 1px)",
+                    },
+                    borderRadius: {
+                        DEFAULT: "0.5rem",
+                    },
+                },
+            },
+        };
+    </script>
+<link href="https://fonts.googleapis.com/icon?family=Material+Icons+Round" rel="stylesheet"/>
+<style>
+        body {
+            font-family: 'JetBrains Mono', monospace; 
+        }
+        h1, h2, h3, h4, h5, h6, .serif {
+            font-family: 'Playfair Display', serif;
+        }
+        .glass-panel {
+            background: rgba(255, 255, 255, 0.03);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+        }
+        .mesh-bg {
+            background-color: #0B0C10;
+            background-image: 
+                radial-gradient(at 0% 0%, hsla(150, 60%, 10%, 0.3) 0px, transparent 50%),
+                radial-gradient(at 100% 0%, hsla(200, 60%, 15%, 0.3) 0px, transparent 50%),
+                radial-gradient(at 100% 100%, hsla(240, 60%, 15%, 0.3) 0px, transparent 50%),
+                radial-gradient(at 0% 100%, hsla(280, 60%, 10%, 0.3) 0px, transparent 50%);
+        }.grid-bg {
+            background-size: 40px 40px;
+            background-image: linear-gradient(to right, rgba(255, 255, 255, 0.02) 1px, transparent 1px),
+                              linear-gradient(to bottom, rgba(255, 255, 255, 0.02) 1px, transparent 1px);
+        }
+    </style>
 </head>
-<body>
-  <a class="skip-link" href="#main">Skip to content</a>
+<body class="bg-background-light dark:bg-background-dark text-gray-900 dark:text-gray-100 transition-colors duration-300">
+<nav class="fixed w-full z-50 top-0 start-0 border-b border-gray-200 dark:border-white/5 bg-background-light/90 dark:bg-background-dark/90 backdrop-blur-md">
+<div class="max-w-screen-xl flex flex-wrap items-center justify-between mx-auto p-4">
+<a class="flex items-center space-x-3 rtl:space-x-reverse" href="#">
+<span class="self-center text-2xl font-semibold whitespace-nowrap serif dark:text-white">ReelFoundry</span>
+</a>
+<div class="flex md:order-2 space-x-3 md:space-x-0 rtl:space-x-reverse">
+<button class="text-white bg-primary hover:bg-orange-600 focus:ring-4 focus:outline-none focus:ring-orange-300 font-medium rounded-full text-sm px-6 py-2 text-center transition-all" type="button">Start</button>
+<button aria-controls="navbar-sticky" aria-expanded="false" class="inline-flex items-center p-2 w-10 h-10 justify-center text-sm text-gray-500 rounded-lg md:hidden hover:bg-gray-100 dark:text-gray-400 dark:hover:bg-gray-700" data-collapse-toggle="navbar-sticky" type="button">
+<span class="sr-only">Open main menu</span>
+<span class="material-icons-round">menu</span>
+</button>
+</div>
+<div class="items-center justify-between hidden w-full md:flex md:w-auto md:order-1" id="navbar-sticky">
+<ul class="flex flex-col p-4 md:p-0 mt-4 font-medium border border-gray-100 rounded-lg md:space-x-8 rtl:space-x-reverse md:flex-row md:mt-0 md:border-0 dark:border-gray-700 font-mono text-sm opacity-80">
+<li>
+<a class="block py-2 px-3 text-gray-900 rounded hover:bg-gray-100 md:hover:bg-transparent md:hover:text-primary md:p-0 dark:text-white dark:hover:text-primary" href="#">Overview</a>
+</li>
+<li>
+<a class="block py-2 px-3 text-gray-900 rounded hover:bg-gray-100 md:hover:bg-transparent md:hover:text-primary md:p-0 dark:text-white dark:hover:text-primary" href="#">Pricing</a>
+</li>
+<li>
+<a class="block py-2 px-3 text-gray-900 rounded hover:bg-gray-100 md:hover:bg-transparent md:hover:text-primary md:p-0 dark:text-white dark:hover:text-primary" href="#">Start</a>
+</li>
+</ul>
+</div>
+</div>
+</nav>
+<section class="relative pt-32 pb-24 overflow-hidden mesh-bg">
+<div class="absolute inset-0 grid-bg pointer-events-none"></div>
+<div class="max-w-screen-xl mx-auto px-4 relative z-10 grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
+<div class="space-y-8">
+<div class="space-y-4">
+<p class="font-mono text-secondary text-xs tracking-widest uppercase">
+                        Turn a product page into ads.
+                    </p>
+<span class="inline-block px-3 py-1 rounded-full border border-secondary/30 text-secondary text-[10px] font-mono bg-secondary/10 tracking-widest uppercase">
+                        Batch 04
+                    </span>
+<h1 class="serif text-5xl md:text-7xl font-bold leading-tight tracking-tight text-gray-900 dark:text-white">
+                        Get more <br/>
+                        winning ads fast.
+                    </h1>
+<p class="text-lg text-gray-600 dark:text-gray-400 max-w-lg font-sans">
+                        Paste a URL. Get 10 short ads. Test what works. Made for beauty and skincare shops on Shopify.
+                    </p>
+</div>
+<button class="text-white bg-primary hover:bg-orange-600 font-medium rounded-full text-base px-8 py-3 text-center transition-all shadow-lg shadow-orange-500/20" type="button">
+                    Create ads
+                </button>
+</div>
+<div class="relative group">
+<div class="absolute -inset-1 bg-gradient-to-r from-secondary to-blue-600 rounded-2xl blur opacity-20 group-hover:opacity-30 transition duration-1000 group-hover:duration-200"></div>
+<div class="glass-panel relative rounded-2xl p-6 md:p-8 shadow-2xl">
+<div class="mb-8">
+<label class="block text-xs text-gray-400 mb-2 font-mono">Drop-zone input (product URL)</label>
+<div class="relative">
+<input class="w-full bg-transparent border border-dashed border-gray-600 text-gray-300 text-sm rounded-lg focus:ring-primary focus:border-primary block p-3 font-mono" readonly="" type="text" value="https://yourstore.com/products/serum"/>
+</div>
+<button class="mt-4 w-full bg-primary hover:bg-orange-600 text-white font-medium rounded-full text-sm py-3 transition-colors shadow-lg">
+                            Create your first ad
+                        </button>
+</div>
+<div class="flex items-center gap-2 mb-8 overflow-x-auto pb-2 scrollbar-hide">
+<span class="px-3 py-1 rounded bg-white/5 border border-white/10 text-[10px] text-gray-400 font-mono whitespace-nowrap">URL</span>
+<span class="text-gray-600 material-icons-round text-xs">arrow_forward</span>
+<span class="px-3 py-1 rounded bg-white/5 border border-white/10 text-[10px] text-gray-400 font-mono whitespace-nowrap">HOOKS</span>
+<span class="text-gray-600 material-icons-round text-xs">arrow_forward</span>
+<span class="px-3 py-1 rounded bg-white/5 border border-white/10 text-[10px] text-gray-400 font-mono whitespace-nowrap">SCENES</span>
+<span class="text-gray-600 material-icons-round text-xs">arrow_forward</span>
+<span class="px-3 py-1 rounded bg-white/5 border border-white/10 text-[10px] text-gray-400 font-mono whitespace-nowrap">REELS</span>
+</div>
+<div class="border-t border-white/10 pt-6">
+<div class="flex justify-between items-end mb-4">
+<span class="text-[10px] tracking-widest text-gray-500 uppercase font-mono">Ad Batch Conveyor</span>
+<div class="flex gap-2 text-[10px] font-mono text-secondary">
+<span>CUT</span> <span class="text-gray-600">/</span> <span>PRINT</span> <span class="text-gray-600">/</span> <span>SHIP</span>
+</div>
+</div>
+<div class="flex gap-4 overflow-hidden mask-gradient-right relative">
+<div class="min-w-[140px] bg-surface-dark border border-white/5 rounded-lg p-3 relative overflow-hidden">
+<div class="absolute top-0 left-0 w-full h-1 bg-secondary/50"></div>
+<div class="text-[10px] text-gray-400 font-mono mb-1">HOOK 01</div>
+<div class="text-xs text-white font-mono">9:16</div>
+<div class="mt-4 flex gap-1">
+<div class="h-1 w-1 rounded-full bg-white/20"></div>
+<div class="h-1 w-1 rounded-full bg-white/20"></div>
+<div class="h-1 w-1 rounded-full bg-white/20"></div>
+</div>
+</div>
+<div class="min-w-[140px] bg-surface-dark border border-white/5 rounded-lg p-3 relative overflow-hidden">
+<div class="absolute top-0 left-0 w-full h-1 bg-blue-500/50"></div>
+<div class="text-[10px] text-gray-400 font-mono mb-1">HOOK 02</div>
+<div class="text-xs text-white font-mono">UGC</div>
+<div class="mt-4 flex gap-1">
+<div class="h-1 w-1 rounded-full bg-white/20"></div>
+<div class="h-1 w-1 rounded-full bg-white/20"></div>
+<div class="h-1 w-1 rounded-full bg-white/20"></div>
+</div>
+</div>
+<div class="min-w-[140px] bg-surface-dark border border-white/5 rounded-lg p-3 relative overflow-hidden">
+<div class="absolute top-0 left-0 w-full h-1 bg-purple-500/50"></div>
+<div class="text-[10px] text-gray-400 font-mono mb-1">HOOK 03</div>
+<div class="text-xs text-white font-mono">Split test</div>
+<div class="mt-4 flex gap-1">
+<div class="h-1 w-1 rounded-full bg-white/20"></div>
+<div class="h-1 w-1 rounded-full bg-white/20"></div>
+<div class="h-1 w-1 rounded-full bg-white/20"></div>
+</div>
+</div>
+<div class="min-w-[140px] bg-surface-dark border border-white/5 rounded-lg p-3 relative overflow-hidden opacity-50">
+<div class="absolute top-0 left-0 w-full h-1 bg-gray-500/50"></div>
+<div class="text-[10px] text-gray-400 font-mono mb-1">TEXT DEMO</div>
+<div class="text-xs text-white font-mono">8 sec</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+</section>
+<section class="py-12 border-y border-gray-200 dark:border-white/5 bg-background-light dark:bg-[#0E0F14]">
+<div class="max-w-screen-xl mx-auto px-4">
+<div class="mb-8">
+<span class="text-[10px] tracking-[0.2em] font-mono text-gray-500 uppercase">Social Proof</span>
+<h2 class="serif text-3xl md:text-4xl mt-2 text-gray-900 dark:text-white">Trusted by real brands.</h2>
+</div>
+<div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4">
+<div class="h-16 flex items-center justify-center border border-gray-200 dark:border-white/10 rounded bg-white dark:bg-white/5">
+<span class="font-mono text-xs tracking-widest text-gray-400">GLOW LAB</span>
+</div>
+<div class="h-16 flex items-center justify-center border border-gray-200 dark:border-white/10 rounded bg-white dark:bg-white/5">
+<span class="font-mono text-xs tracking-widest text-gray-400">DERMAL CO</span>
+</div>
+<div class="h-16 flex items-center justify-center border border-gray-200 dark:border-white/10 rounded bg-white dark:bg-white/5">
+<span class="font-mono text-xs tracking-widest text-gray-400">LIPID LAB</span>
+</div>
+<div class="h-16 flex items-center justify-center border border-gray-200 dark:border-white/10 rounded bg-white dark:bg-white/5">
+<span class="font-mono text-xs tracking-widest text-gray-400">RADIANT</span>
+</div>
+<div class="h-16 flex items-center justify-center border border-gray-200 dark:border-white/10 rounded bg-white dark:bg-white/5">
+<span class="font-mono text-xs tracking-widest text-gray-400">SOOTHE</span>
+</div>
+<div class="h-16 flex items-center justify-center border border-gray-200 dark:border-white/10 rounded bg-white dark:bg-white/5">
+<span class="font-mono text-xs tracking-widest text-gray-400">VIVID SKIN</span>
+</div>
+</div>
+</div>
+</section>
+<section class="py-24 bg-background-light dark:bg-background-dark relative">
+<div class="absolute inset-0 bg-[radial-gradient(ellipse_at_bottom,_var(--tw-gradient-stops))] from-blue-900/20 via-background-dark to-background-dark pointer-events-none"></div>
+<div class="max-w-screen-xl mx-auto px-4 relative z-10">
+<div class="mb-12">
+<span class="text-[10px] tracking-[0.2em] font-mono text-gray-500 uppercase">Pricing</span>
+<h2 class="serif text-5xl md:text-6xl mt-2 mb-8 text-gray-900 dark:text-white">Simple plans.</h2>
+<div class="flex items-center gap-4">
+<span class="text-xs font-mono font-bold text-gray-900 dark:text-white">MONTHLY</span>
+<label class="relative inline-flex items-center cursor-pointer">
+<input class="sr-only peer" type="checkbox" value=""/>
+<div class="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-blue-300 dark:peer-focus:ring-blue-800 rounded-full peer dark:bg-gray-700 peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:start-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all dark:border-gray-600 peer-checked:bg-primary"></div>
+</label>
+<span class="text-xs font-mono text-gray-500">ANNUAL</span>
+<span class="text-[10px] px-2 py-0.5 rounded border border-secondary text-secondary font-mono bg-secondary/10">SAVE 20%</span>
+</div>
+</div>
+<div class="grid grid-cols-1 md:grid-cols-3 gap-8 items-start">
+<div class="p-8 rounded-2xl border border-gray-200 dark:border-white/10 bg-white dark:bg-surface-dark/50 hover:border-gray-300 dark:hover:border-white/20 transition-all">
+<h3 class="font-mono text-xs uppercase tracking-widest text-gray-500 mb-6">Prototype</h3>
+<div class="flex items-baseline mb-6">
+<span class="serif text-2xl dark:text-white">$299</span>
+<span class="text-gray-500 font-mono text-sm ml-2">/ mo</span>
+</div>
+<p class="text-sm font-semibold mb-6 dark:text-white">For small tests.</p>
+<ul class="space-y-3 mb-8 text-xs font-mono text-gray-500 dark:text-gray-400">
+<li class="flex items-center"><span class="text-secondary mr-2">+</span> 30 ads / month</li>
+<li class="flex items-center"><span class="text-secondary mr-2">+</span> 1 brand</li>
+<li class="flex items-center"><span class="text-secondary mr-2">+</span> Basic tests</li>
+</ul>
+<button class="w-full py-2 rounded-full border border-gray-300 dark:border-white/20 text-xs font-mono uppercase hover:bg-white hover:text-black dark:hover:bg-white dark:hover:text-black transition-colors dark:text-white">Start</button>
+</div>
+<div class="p-8 rounded-2xl border border-secondary/50 bg-white dark:bg-surface-dark/80 relative shadow-[0_0_30px_rgba(209,243,18,0.05)] transform md:-translate-y-4">
+<div class="absolute -top-3 left-8 bg-secondary/10 border border-secondary/20 text-secondary text-[10px] font-mono px-3 py-1 rounded">MOST POPULAR</div>
+<h3 class="font-mono text-xs uppercase tracking-widest text-gray-500 mb-6 mt-2">Operator</h3>
+<div class="flex items-baseline mb-6">
+<span class="serif text-2xl dark:text-white">$699</span>
+<span class="text-gray-500 font-mono text-sm ml-2">/ mo</span>
+</div>
+<p class="text-sm font-semibold mb-6 dark:text-white">For growing teams.</p>
+<ul class="space-y-3 mb-8 text-xs font-mono text-gray-500 dark:text-gray-400">
+<li class="flex items-center"><span class="text-secondary mr-2">+</span> 150 ads / month</li>
+<li class="flex items-center"><span class="text-secondary mr-2">+</span> 3 brands</li>
+<li class="flex items-center"><span class="text-secondary mr-2">+</span> Advanced tests</li>
+<li class="flex items-center"><span class="text-secondary mr-2">+</span> Meta + TikTok</li>
+</ul>
+<button class="w-full py-2 rounded-full bg-white dark:bg-white text-black text-xs font-mono uppercase hover:bg-gray-100 transition-colors font-bold">Start</button>
+</div>
+<div class="p-8 rounded-2xl border border-gray-200 dark:border-white/10 bg-white dark:bg-surface-dark/50 hover:border-gray-300 dark:hover:border-white/20 transition-all">
+<h3 class="font-mono text-xs uppercase tracking-widest text-gray-500 mb-6">Foundry</h3>
+<div class="flex items-baseline mb-6">
+<span class="serif text-2xl dark:text-white">$1,499</span>
+<span class="text-gray-500 font-mono text-sm ml-2">/ mo</span>
+</div>
+<p class="text-sm font-semibold mb-6 dark:text-white">For big teams.</p>
+<ul class="space-y-3 mb-8 text-xs font-mono text-gray-500 dark:text-gray-400">
+<li class="flex items-center"><span class="text-secondary mr-2">+</span> Unlimited ads</li>
+<li class="flex items-center"><span class="text-secondary mr-2">+</span> 10 brands</li>
+<li class="flex items-center"><span class="text-secondary mr-2">+</span> Priority support</li>
+<li class="flex items-center"><span class="text-secondary mr-2">+</span> Custom workflows</li>
+</ul>
+<button class="w-full py-2 rounded-full border border-gray-300 dark:border-white/20 text-xs font-mono uppercase hover:bg-white hover:text-black dark:hover:bg-white dark:hover:text-black transition-colors dark:text-white">Talk to sales</button>
+</div>
+</div>
+</div>
+</section>
+<section class="py-20 bg-background-light dark:bg-[#08090C] border-t border-gray-200 dark:border-white/5">
+<div class="max-w-screen-xl mx-auto px-4">
+<div class="grid grid-cols-1 md:grid-cols-2 gap-12 mb-20">
+<div>
+<span class="inline-block px-3 py-1 rounded-full border border-secondary/30 text-secondary text-[10px] font-mono bg-secondary/10 tracking-widest uppercase mb-6">
+                        Ready to test
+                    </span>
+<h2 class="serif text-4xl md:text-5xl font-bold leading-tight mb-8 text-gray-900 dark:text-white">
+                        Make your next ads <br/> in minutes.
+                    </h2>
+<button class="text-white bg-primary hover:bg-orange-600 font-medium rounded-full text-sm px-8 py-3 text-center transition-all shadow-lg shadow-orange-500/10" type="button">
+                        Create ads
+                    </button>
+</div>
+</div>
+<div class="grid grid-cols-2 md:grid-cols-4 gap-8 border-t border-gray-200 dark:border-white/10 pt-12">
+<div>
+<h4 class="font-mono text-[10px] uppercase tracking-widest text-gray-500 mb-4">Product</h4>
+<ul class="space-y-2 text-sm text-gray-900 dark:text-gray-300 font-medium">
+<li><a class="hover:text-primary transition-colors" href="#">Overview</a></li>
+<li><a class="hover:text-primary transition-colors" href="#">Pricing</a></li>
+</ul>
+</div>
+<div>
+<h4 class="font-mono text-[10px] uppercase tracking-widest text-gray-500 mb-4">Company</h4>
+<ul class="space-y-2 text-sm text-gray-900 dark:text-gray-300 font-medium">
+<li><a class="hover:text-primary transition-colors" href="#">About</a></li>
+<li><a class="hover:text-primary transition-colors" href="#">Careers</a></li>
+<li><a class="hover:text-primary transition-colors" href="#">Contact</a></li>
+</ul>
+</div>
+<div>
+<h4 class="font-mono text-[10px] uppercase tracking-widest text-gray-500 mb-4">Legal</h4>
+<ul class="space-y-2 text-sm text-gray-900 dark:text-gray-300 font-medium">
+<li><a class="hover:text-primary transition-colors" href="#">Privacy</a></li>
+<li><a class="hover:text-primary transition-colors" href="#">Terms</a></li>
+<li><a class="hover:text-primary transition-colors" href="#">Security</a></li>
+</ul>
+</div>
+<div class="flex items-start justify-end">
+<button class="p-2 rounded-full border border-gray-300 dark:border-white/10 hover:bg-gray-100 dark:hover:bg-white/10 transition-colors">
+<span class="sr-only">Settings</span>
+<span class="material-icons-round text-gray-500 text-sm">tune</span>
+</button>
+</div>
+</div>
+</div>
+</section>
 
-  <svg class="grain" aria-hidden="true" viewBox="0 0 200 200" preserveAspectRatio="none">
-    <filter id="noiseFilter">
-      <feTurbulence type="fractalNoise" baseFrequency="0.8" numOctaves="2" stitchTiles="stitch" />
-    </filter>
-    <rect width="100%" height="100%" filter="url(#noiseFilter)" />
-  </svg>
-
-  <header>
-    <div class="container nav">
-      <div class="brand">ReelFoundry</div>
-      <nav class="nav-links" aria-label="Primary">
-        <a href="#use-case">Overview</a>
-        <a href="#pricing">Pricing</a>
-        <a href="#create">Start</a>
-      </nav>
-      <a class="nav-cta" href="#create">Start</a>
-    </div>
-  </header>
-
-  <main id="main">
-    <section class="hero" id="use-case">
-      <div class="container hero-grid">
-        <div>
-          <p class="tagline load" style="animation-delay: 0.1s;">Turn a product page into ads.</p>
-          <span class="stamp load" style="animation-delay: 0.2s;">Batch 04</span>
-          <h1 class="load" style="animation-delay: 0.3s;">Get more winning ads fast.</h1>
-          <p class="load" style="animation-delay: 0.4s;">Paste a URL. Get 10 short ads. Test what works.</p>
-          <p class="niche load" style="animation-delay: 0.5s;">Made for beauty and skincare shops on Shopify.</p>
-          <div class="hero-actions load" style="animation-delay: 0.6s;">
-            <a class="btn-primary" href="#create">Create ads</a>
-          </div>
-        </div>
-
-        <div class="hero-assembly" id="create">
-          <form class="hero-form" novalidate>
-            <div class="dropzone">
-              <label for="product-url">Drop-zone input (product URL)</label>
-              <input id="product-url" name="product-url" type="url" placeholder="https://yourstore.com/products/serum" autocomplete="url" />
-            </div>
-            <button class="btn-primary" type="submit">Create your first ad</button>
-            <div class="form-feedback" role="status" aria-live="polite"></div>
-            <div class="pipeline" aria-hidden="true">
-              <span>URL</span>
-              <span class="arrow">-&gt;</span>
-              <span>Hooks</span>
-              <span class="arrow">-&gt;</span>
-              <span>Scenes</span>
-              <span class="arrow">-&gt;</span>
-              <span>Reels</span>
-            </div>
-          </form>
-
-          <div class="feed-area">
-            <div class="feed-line"></div>
-            <div class="slug">READY TO TEST</div>
-            <div class="conveyor" aria-label="Ad batch conveyor">
-              <div class="conveyor-title">
-                <span class="label">Ad Batch Conveyor</span>
-                <span class="stamp">Cut / Print / Ship</span>
-              </div>
-              <div class="filmstrip">
-                <div class="reels">
-                  <div class="reel-card"><div class="reel-title">Hook 01</div><div class="reel-sub">9:16</div></div>
-                  <div class="reel-card"><div class="reel-title">Hook 02</div><div class="reel-sub">UGC</div></div>
-                  <div class="reel-card"><div class="reel-title">Hook 03</div><div class="reel-sub">Split test</div></div>
-                  <div class="reel-card"><div class="reel-title">Texture demo</div><div class="reel-sub">8 sec</div></div>
-                  <div class="reel-card"><div class="reel-title">Proof test</div><div class="reel-sub">Variant B</div></div>
-                  <div class="reel-card"><div class="reel-title">Before/after</div><div class="reel-sub">Variant C</div></div>
-                  <div class="reel-card"><div class="reel-title">Hook 01</div><div class="reel-sub">9:16</div></div>
-                  <div class="reel-card"><div class="reel-title">Hook 02</div><div class="reel-sub">UGC</div></div>
-                  <div class="reel-card"><div class="reel-title">Hook 03</div><div class="reel-sub">Split test</div></div>
-                  <div class="reel-card"><div class="reel-title">Texture demo</div><div class="reel-sub">8 sec</div></div>
-                  <div class="reel-card"><div class="reel-title">Proof test</div><div class="reel-sub">Variant B</div></div>
-                  <div class="reel-card"><div class="reel-title">Before/after</div><div class="reel-sub">Variant C</div></div>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-    </section>
-
-    <section class="social-proof reveal">
-      <div class="container">
-        <p class="eyebrow">Social Proof</p>
-        <h2 class="section-title">Trusted by real brands.</h2>
-        <div class="logo-grid">
-          <div class="logo">Glow Lab</div>
-          <div class="logo">Dermal Co</div>
-          <div class="logo">Lipid Lab</div>
-          <div class="logo">Radiant</div>
-          <div class="logo">Soothe</div>
-          <div class="logo">Vivid Skin</div>
-        </div>
-      </div>
-    </section>
-
-    <section class="pricing reveal" id="pricing">
-      <div class="container">
-        <p class="eyebrow">Pricing</p>
-        <h2 class="section-title">Simple plans.</h2>
-
-        <div class="billing-toggle">
-          <span>Monthly</span>
-          <button class="toggle" id="billing-toggle" type="button" role="switch" aria-checked="false" aria-label="Toggle billing period">
-            <span class="toggle-thumb"></span>
-          </button>
-          <span>Annual</span>
-          <span class="stamp">Save 20%</span>
-        </div>
-
-        <div class="pricing-grid" data-billing="monthly">
-          <div class="tier">
-            <div class="tier-title">Prototype</div>
-            <div class="price"><span class="amount" data-monthly="$299" data-annual="$249">$299</span> <span class="period">/ mo</span></div>
-            <p>For small tests.</p>
-            <ul>
-              <li>30 ads / month</li>
-              <li>1 brand</li>
-              <li>Basic tests</li>
-            </ul>
-            <button class="tier-cta">Start</button>
-          </div>
-
-          <div class="tier popular">
-            <div class="tier-title">Operator</div>
-            <span class="stamp">Most popular</span>
-            <div class="price"><span class="amount" data-monthly="$699" data-annual="$579">$699</span> <span class="period">/ mo</span></div>
-            <p>For growing teams.</p>
-            <ul>
-              <li>150 ads / month</li>
-              <li>3 brands</li>
-              <li>Advanced tests</li>
-              <li>Meta + TikTok</li>
-            </ul>
-            <button class="tier-cta">Start</button>
-          </div>
-
-          <div class="tier">
-            <div class="tier-title">Foundry</div>
-            <div class="price"><span class="amount" data-monthly="$1,499" data-annual="$1,199">$1,499</span> <span class="period">/ mo</span></div>
-            <p>For big teams.</p>
-            <ul>
-              <li>Unlimited ads</li>
-              <li>10 brands</li>
-              <li>Priority support</li>
-              <li>Custom workflows</li>
-            </ul>
-            <button class="tier-cta">Talk to sales</button>
-          </div>
-        </div>
-      </div>
-    </section>
-  </main>
-
-  <footer>
-    <div class="container">
-      <div>
-        <span class="stamp">READY TO TEST</span>
-        <h2 class="section-title">Make your next ads in minutes.</h2>
-        <a class="btn-primary" href="#create">Create ads</a>
-      </div>
-
-      <div class="footer-grid">
-        <div>
-          <h4>Product</h4>
-          <a href="#use-case">Overview</a><br />
-          <a href="#pricing">Pricing</a>
-        </div>
-        <div>
-          <h4>Company</h4>
-          <a href="#">About</a><br />
-          <a href="#">Careers</a><br />
-          <a href="#">Contact</a>
-        </div>
-        <div>
-          <h4>Legal</h4>
-          <a href="#">Privacy</a><br />
-          <a href="#">Terms</a><br />
-          <a href="#">Security</a>
-        </div>
-      </div>
-    </div>
-  </footer>
-
-  <script>
-    document.addEventListener("DOMContentLoaded", () => {
-      const revealItems = document.querySelectorAll(".reveal");
-      const observer = new IntersectionObserver(
-        (entries) => {
-          entries.forEach((entry) => {
-            if (entry.isIntersecting) {
-              entry.target.classList.add("in-view");
-            }
-          });
-        },
-        { threshold: 0.2 }
-      );
-
-      revealItems.forEach((item) => observer.observe(item));
-
-      const toggle = document.getElementById("billing-toggle");
-      const pricingGrid = document.querySelector(".pricing-grid");
-      const amountNodes = Array.from(document.querySelectorAll(".price .amount"));
-      const periodNodes = Array.from(document.querySelectorAll(".price .period"));
-
-      toggle.addEventListener("click", () => {
-        const isAnnual = toggle.getAttribute("aria-checked") === "true";
-        toggle.setAttribute("aria-checked", (!isAnnual).toString());
-        pricingGrid.dataset.billing = isAnnual ? "monthly" : "annual";
-
-        amountNodes.forEach((amount) => {
-          const value = isAnnual ? amount.dataset.monthly : amount.dataset.annual;
-          amount.textContent = value;
-        });
-
-        periodNodes.forEach((period) => {
-          period.textContent = isAnnual ? "/ mo" : "/ yr";
-        });
-      });
-
-      const hero = document.querySelector(".hero");
-      const heroForm = document.querySelector(".hero-form");
-      const urlInput = document.getElementById("product-url");
-      const feedback = document.querySelector(".form-feedback");
-      const reelTitles = Array.from(document.querySelectorAll(".reel-title"));
-
-      function setFeedback(message, isError) {
-        feedback.textContent = message;
-        feedback.classList.toggle("error", isError);
-      }
-
-      heroForm.addEventListener("submit", (event) => {
-        event.preventDefault();
-        const value = urlInput.value.trim();
-        let valid = false;
-
-        try {
-          const parsed = new URL(value);
-          valid = parsed.protocol === "http:" || parsed.protocol === "https:";
-        } catch (error) {
-          valid = false;
-        }
-
-        if (!valid) {
-          setFeedback("Enter a valid product URL (https://...)", true);
-          urlInput.setAttribute("aria-invalid", "true");
-          return;
-        }
-
-        urlInput.setAttribute("aria-invalid", "false");
-        setFeedback("Queued. Generating fresh variants...", false);
-
-        hero.classList.remove("feed");
-        void hero.offsetWidth;
-        hero.classList.add("feed");
-
-        const seed = value
-          .replace(/^https?:\/\//, "")
-          .split(/[\/_-]/)
-          .filter(Boolean)
-          .slice(0, 2)
-          .join(" ")
-          .toUpperCase();
-
-        const list = [
-          `${seed || "PRODUCT"} / HOOK 01`,
-          `${seed || "PRODUCT"} / HOOK 02`,
-          `${seed || "PRODUCT"} / HOOK 03`,
-          "TEXTURE DEMO",
-          "PROOF TEST",
-          "BEFORE/AFTER",
-        ];
-
-        reelTitles.forEach((title, index) => {
-          title.textContent = list[index % list.length];
-        });
-      });
-    });
-  </script>
-</body>
-</html>
+</body></html>
